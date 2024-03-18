@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= todo.title %></title>
+</head>
+<body>
+
+<h1><%= todo.title %></h1>
+<p>Status: <%= todo.done ? 'Hotové' : 'Nedokončené' %></p>
+
+<a href="/toggle-todo/<%= todo.id %>">Změnit stav</a>
+<a href="/remove-todo/<%= todo.id %>" onclick="return confirm('Opravdu chcete odstranit tento úkol?');">Odstranit</a>
+
+<form action="/update-todo/<%= todo.id %>" method="post">
+    <input type="text" name="title" value="<%= todo.title %>" required>
+    <button type="submit">Aktualizovat titulek</button>
+</form>
+
+<a href="/">Zpět na seznam</a>
+
+
+
+</body>
+</html>

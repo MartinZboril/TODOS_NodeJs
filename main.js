@@ -59,8 +59,31 @@ app.get('/toggle-todo/:id', (req, res) => {
 
   todo.done = !todo.done
 
-  res.redirect('/')
+  res.redirect(req.get('Referer').includes(`/todo/${todo.id}`) ? `/todo/${todo.id}` : '/');
 })
+
+app.get('/todo/:id', (req, res) => {
+  const todo = todos.find(todo => todo.id === Number(req.params.id));
+
+  if (! todo) {
+    return res.status(404).send('Todo not found');
+  }
+
+  res.render('todo', { todo });
+});
+
+app.post('/update-todo/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const todo = todos.find(todo => todo.id === id);
+
+  if (! todo) {
+    return res.status(404).send('Todo not found');
+  }
+
+  todo.title = req.body.title;
+
+  res.redirect(`/todo/${id}`);
+});
 
 app.use((req, res) => {
   res.status(404)

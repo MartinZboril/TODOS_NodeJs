@@ -12,8 +12,10 @@
 <ul>
 <% for (const todo of todos) { %>
   <li>
-     <%= todo.title %>
-     <a href="/remove-todo/<%= todo.id %>">
+     <a href="/todo/<%= todo.id %>">
+        <%= todo.title %>
+     </a>
+     <a href="/remove-todo/<%= todo.id %>" onclick="return confirm('Opravdu chcete odstranit tento úkol?');">
         odebrat
      </a>
      <a href="/toggle-todo/<%= todo.id %>">
