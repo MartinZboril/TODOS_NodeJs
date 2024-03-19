@@ -1,101 +1,89 @@
-import express from 'express'
+import express from 'express';
+import knex from 'knex';
+import knexfile from "./knexfile.js";
 
-const app = express()
+const app = express();
+const db = knex(knexfile);
 
-let todos = [
-  {
-    id: 1,
-    title: 'Zajít na pivo',
-    done: true,
-  },
-  {
-    id: 2,
-    title: 'Vrátit se z hospody',
-    done: false,
-  },
-]
+app.set('view engine', 'ejs');
 
-app.set('view engine', 'ejs')
-
-app.use(express.static('public'))
-app.use(express.urlencoded({ extended: true }))
+app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
-  console.log('Incomming request', req.method, req.url)
-  next()
-})
+  console.log('Incomming request', req.method, req.url);
+  next();
+});
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+  const todos = await db().select('*').from('todos');
+
   res.render('index', {
     title: 'Todos',
     todos,
-  })
-})
+  });
+});
 
-app.post('/add-todo', (req, res) => {
+app.post('/add-todo', async (req, res) => {
   const todo = {
-    id: todos.length + 1,
     title: req.body.title,
     done: false,
-  }
+  };
 
-  todos.push(todo)
+  await db('todos').insert(todo);
 
-  res.redirect('/')
+  res.redirect('/');
 })
 
-app.get('/remove-todo/:id', (req, res) => {
-  todos = todos.filter((todo) => {
-    return todo.id !== Number(req.params.id)
-  })
+app.get('/remove-todo/:id', async (req, res) => {
+  const todo = await db('todos').select('*').where('id', req.params.id).first();
 
-  res.redirect('/')
+  if (! todo) return next();
+
+  await db('todos').delete().where('id', todo.id);
+
+  res.redirect('/');
 })
 
-app.get('/toggle-todo/:id', (req, res) => {
-  const todo = todos.find((todo) => {
-    return todo.id === Number(req.params.id)
-  })
+app.get('/toggle-todo/:id', async (req, res) => {
+  const todo = await db('todos').select('*').where('id', req.params.id).first();
 
-  todo.done = !todo.done
+  if (! todo) return next();
 
-  res.redirect(req.get('Referer').includes(`/todo/${todo.id}`) ? `/todo/${todo.id}` : '/');
+  await db('todos').update({ done: ! todo.done }).where('id', todo.id);
+
+  res.redirect('back');
 })
 
-app.get('/todo/:id', (req, res) => {
-  const todo = todos.find(todo => todo.id === Number(req.params.id));
+app.get('/todo/:id', async (req, res) => {
+  const todo = await db('todos').select('*').where('id', req.params.id).first();
 
-  if (! todo) {
-    return res.status(404).send('Todo not found');
-  }
+  if (! todo) return next();
 
   res.render('todo', { todo });
 });
 
-app.post('/update-todo/:id', (req, res) => {
-  const id = Number(req.params.id);
-  const todo = todos.find(todo => todo.id === id);
+app.post('/update-todo/:id', async (req, res) => {
+  const todo = await db('todos').select('*').where('id', req.params.id).first();
 
-  if (! todo) {
-    return res.status(404).send('Todo not found');
-  }
+  if (! todo) return next();
 
-  todo.title = req.body.title;
+  await db('todos').update({ title: req.body.title }).where('id', todo.id);
 
-  res.redirect(`/todo/${id}`);
+  res.redirect(`/todo/${todo.id}`);
 });
 
 app.use((req, res) => {
-  res.status(404)
-  res.send('404 - Page not found')
-})
+  res.status(404);
+  res.send('404 - Page not found');
+});
 
 app.use((err, req, res, next) => {
-  console.error(err)
-  res.status(500)
-  res.send('500 - Server error')
-})
+  console.error(err);
+  res.status(500);
+  res.send('500 - Server error');
+});
 
 app.listen(3000, () => {
-  console.log('Server listening on http://localhost:3000')
-})
+  console.log('Server listening on http://localhost:3000');
+});
