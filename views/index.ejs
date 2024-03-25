@@ -12,14 +12,17 @@
 <ul>
 <% for (const todo of todos) { %>
   <li>
+      <a href="/toggle-todo/<%= todo.id %>">
+          <%= todo.done ? 'hotovo' : 'nehotovo' %>
+      </a>
+      -
      <a href="/todo/<%= todo.id %>">
         <%= todo.title %>
      </a>
+      (<%= translatePriority(todo.priority) %>)
+      |
      <a href="/remove-todo/<%= todo.id %>" onclick="return confirm('Opravdu chcete odstranit tento úkol?');">
         odebrat
-     </a>
-     <a href="/toggle-todo/<%= todo.id %>">
-       <%= todo.done ? 'hotovo' : 'nehotvo' %>
      </a>
   </li>
 <% } %>

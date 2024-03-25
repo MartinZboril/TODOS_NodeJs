@@ -2,6 +2,16 @@ import express from 'express';
 import knex from 'knex';
 import knexfile from "./knexfile.js";
 
+function translatePriority(priority) {
+  const translations = {
+    low: 'nízká',
+    normal: 'normální',
+    high: 'vysoká'
+  };
+  return translations[priority] || 'neznámá';
+}
+
+
 const app = express();
 const db = knex(knexfile);
 
@@ -16,11 +26,14 @@ app.use((req, res, next) => {
 });
 
 app.get('/', async (req, res) => {
-  const todos = await db().select('*').from('todos');
+  const todos = await db()
+      .select('*')
+      .from('todos');
 
   res.render('index', {
     title: 'Todos',
     todos,
+    translatePriority
   });
 });
 
@@ -60,7 +73,7 @@ app.get('/todo/:id', async (req, res) => {
 
   if (! todo) return next();
 
-  res.render('todo', { todo });
+  res.render('todo', { todo, translatePriority });
 });
 
 app.post('/update-todo/:id', async (req, res) => {
@@ -68,7 +81,7 @@ app.post('/update-todo/:id', async (req, res) => {
 
   if (! todo) return next();
 
-  await db('todos').update({ title: req.body.title }).where('id', todo.id);
+  await db('todos').update({ title: req.body.title, priority: req.body.priority }).where('id', todo.id);
 
   res.redirect(`/todo/${todo.id}`);
 });

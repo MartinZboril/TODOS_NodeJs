@@ -8,14 +8,29 @@
 <body>
 
 <h1><%= todo.title %></h1>
-<p>Status: <%= todo.done ? 'Hotové' : 'Nedokončené' %></p>
+<p>
+    Status: <%= todo.done ? 'Hotové' : 'Nedokončené' %><br>
+    Priorita: <%= translatePriority(todo.priority) %>
+</p>
 
 <a href="/toggle-todo/<%= todo.id %>">Změnit stav</a>
 <a href="/remove-todo/<%= todo.id %>" onclick="return confirm('Opravdu chcete odstranit tento úkol?');">Odstranit</a>
 
 <form action="/update-todo/<%= todo.id %>" method="post">
-    <input type="text" name="title" value="<%= todo.title %>" required>
-    <button type="submit">Aktualizovat titulek</button>
+    <div class="">
+        <input type="text" name="title" value="<%= todo.title %>" required>
+    </div>
+    <div class="">
+        <label for="priority">Priorita:</label>
+        <select name="priority" id="priority">
+            <option value="low" <%= 'low' === todo.priority ? 'selected' : '' %>>nízká</option>
+            <option value="normal" <%= 'normal' === todo.priority ? 'selected' : '' %>>normální</option>
+            <option value="high" <%= 'high' === todo.priority ? 'selected' : '' %>>vysoká</option>
+        </select>
+    </div>
+    <div class="">
+        <button type="submit">Aktualizovat</button>
+    </div>
 </form>
 
 <a href="/">Zpět na seznam</a>
